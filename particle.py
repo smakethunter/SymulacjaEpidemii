@@ -16,7 +16,13 @@ class Particle:
         self.mortality = 0.15
 
     def update_mortality(self,mortality):
+        """
+        Update śmiertelności
+        :param mortality:
+        :return:
+        """
         self.mortality = mortality
+
     def get_infected(self):
         self.state = 'infected'
         self.state_conj = np.random.choice(['no_security_measures', 'infecting'])
@@ -33,22 +39,40 @@ class Particle:
         pass
 
     def stop_infecting(self):
+
         self.state = 'sick'
         self.state_conj = 'no_security_measures'
 
     def die(self):
+        """
+        umrzyj
+
+        """
         self.state = 'dead'
         self.state_conj = 'no_security_measures'
 
     def quarantine(self):
+        """
+        wyślij na kwarantannę
+
+        """
         self.state = 'quarantine'
         self.state_conj = 'protecting_others'
         pass
+
     def is_dead(self):
+        """
+        sprawdza czy osobnik umrze
+        :return: bool
+        """
         number = np.random.rand()
         probability = self.mortality
         return number <= probability
     def wait(self):
+        """
+        Zmienia stan jednostki zakażonej lub na kwarantannie w zależności od czasu symulacji
+
+        """
         if self.state != 'healthy' and self.state != 'dead':
             self.time_waiting += 1
             if self.state == 'infected' and self.time_waiting == 5:
@@ -69,7 +93,13 @@ class Particle:
                     self.state = 'healthy'
 
 
-def infecting_probability(neighbors: List[Particle]):
+def probability_of_getting_infected(neighbors: List[Particle]):
+    """
+    Zwraca prawdopodobieństwo zakażenia na podstawie stanu sąsiadów
+    :param neighbors: lista sąsiadów
+    :return: prawdopodobieństwo
+    """
+    # TODO: edytować tabelę prawopodobieństw
     proba_from_state = np.full((8,5),0.01)
     proba = 0
     for neighbor in neighbors:
@@ -78,37 +108,60 @@ def infecting_probability(neighbors: List[Particle]):
 
 
 def update_particles(particles, u):
+    """
+    Dla każdego osobnika z planszy wykonujemy update stanu
+    :param particles: osobniki z planszy
+    :param u: sterowanie w postaci słownika
+    :return: None
+    """
     previous_state = deepcopy(particles)
 
     for i, particles_row in enumerate(particles):
         for j, particle in enumerate(particles_row):
             if particle.state == 'healthy':
+                # próba zakażenia
                 number = np.random.rand()
                 neighbors = get_neigbors(previous_state, i, j)
-                probability = infecting_probability(neighbors)
+                probability = probability_of_getting_infected(neighbors)
                 if number <= probability :
                     particle.get_infected()
                 else:
+                    # skierowanie na kwarantannę
                     number = np.random.rand()
                     probability = u['security_measures']
-                    if number <= probability :
+                    if number <= probability:
                         particle.quarantine()
 
             else:
+                # zmiana stanu dla zakażonego
                 particle.update_mortality(u['mortality'])
                 particle.wait()
-def particles_to_image(particles):
+
+
+def particles_to_image(particles)-> np.ndarray:
+    """
+    Rysowanie planszy
+    :param particles: List(List(Particle)) - osobniki
+    :return: np.ndarray pokolorowany obrazek
+    """
     image = np.zeros((len(particles), len(particles[0]),3))
     for i, particles_row in enumerate(particles):
         for j, particle in enumerate(particles_row):
             image[i, j, :] = colours2rgb[colours[particle.state]]
     return image
-def get_state_number(particles,states):
+
+def get_state_number(particles, states: List[str]):
+    """
+    Podaje liczebność danych klas
+    :param particles: osobniki
+    :param states: stany które chcemy podliczyć
+    :return: podliczone stany
+    """
     sum = 0
     for i, particles_row in enumerate(particles):
         for j, particle in enumerate(particles_row):
             if particle.state in states:
-                sum+=1
+                sum += 1
     return sum
 
 
