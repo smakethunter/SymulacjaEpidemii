@@ -103,6 +103,14 @@ def particles_to_image(particles):
         for j, particle in enumerate(particles_row):
             image[i, j, :] = colours2rgb[colours[particle.state]]
     return image
+def get_state_number(particles,states):
+    sum = 0
+    for i, particles_row in enumerate(particles):
+        for j, particle in enumerate(particles_row):
+            if particle.state in states:
+                sum+=1
+    return sum
+
 
 if __name__ == "__main__":
     particles = [[Particle('healthy') for i in range(100)] for j in range(100)]
