@@ -49,23 +49,24 @@ class Particle:
         probability = self.mortality
         return number <= probability
     def wait(self):
-        if self.state == 'infected':
-            self.time_waiting+=1
-            if self.time_waiting == 5:
+        if self.state != 'healthy' and self.state != 'dead':
+            self.time_waiting += 1
+            if self.state == 'infected' and self.time_waiting == 5:
                 self.state = 'infected_and_sick'
-            elif self.time_waiting == 9:
+            elif self.state == 'infected_and_sick' and self.time_waiting == 9:
                 self.state = 'sick'
-            elif self.time_waiting == 14:
+            elif self.state == 'sick' and self.time_waiting == 14:
                 if self.is_dead():
                     self.die()
+                    self.time_waiting = 0
                 else:
                     self.recover()
                     self.time_waiting = 0
-        elif self.state == 'quarantine':
-            self.time_waiting += 1
-            if self.time_waiting == 14:
-                self.time_waiting = 0
-                self.state = 'healthy'
+            elif self.state == 'quarantine':
+
+                if self.time_waiting == 14:
+                    self.time_waiting = 0
+                    self.state = 'healthy'
 
 
 def infecting_probability(neighbors: List[Particle]):
@@ -110,8 +111,8 @@ if __name__ == "__main__":
     particles[2][3].get_infected()
     print(main_states)
     u = {'security_measures': 0.01, 'mortality': 0.15}
-    print([[particle.state for particle in particle_row] for particle_row in particles])
-    update_particles(particles, u=u)
+    for i in range(100):
+        update_particles(particles, u)
     print([[particle.state for particle in particle_row] for particle_row in particles])
     plt.imshow(particles_to_image(particles))
     plt.show()
