@@ -1,10 +1,13 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from typing import List
 from neighborhood import get_neigbors
 from copy import deepcopy
 main_states = {k: i for i, k in enumerate(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'])}
 conj_states = {k: i for i, k in enumerate(['protecting_others', 'self_protecting', 'no_security_measures', 'infecting', 'organizing_protection'])}
-
+colours = dict(zip(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'],
+               [0,0,1,1,1,0,2,3]))
+colours2rgb = dict(zip([0,1,2,3],[np.array([90, 252, 3])/255.,np.array([252, 28, 3])/255.,np.array([3, 173, 252])/255.,np.array([2, 1, 8])/255.]))
 class Particle:
     def __init__(self, state):
         self.state = state
@@ -66,7 +69,7 @@ class Particle:
 
 
 def infecting_probability(neighbors: List[Particle]):
-    proba_from_state = np.full((8,5),0.1)
+    proba_from_state = np.full((8,5),0.01)
     proba = 0
     for neighbor in neighbors:
         proba += proba_from_state[main_states[neighbor.state], conj_states[neighbor.state_conj]]
@@ -93,8 +96,15 @@ def update_particles(particles, u):
             else:
                 particle.update_mortality(u['mortality'])
                 particle.wait()
+def particles_to_image(particles):
+    image = np.zeros((len(particles), len(particles[0]),3))
+    for i, particles_row in enumerate(particles):
+        for j, particle in enumerate(particles_row):
+            image[i, j, :] = colours2rgb[colours[particle.state]]
+    return image
+
 if __name__ == "__main__":
-    particles = [[Particle('healthy') for i in range(10)] for j in range(10)]
+    particles = [[Particle('healthy') for i in range(100)] for j in range(100)]
     particles[3][4].get_infected()
     particles[3][3].get_infected()
     particles[2][3].get_infected()
@@ -103,4 +113,5 @@ if __name__ == "__main__":
     print([[particle.state for particle in particle_row] for particle_row in particles])
     update_particles(particles, u=u)
     print([[particle.state for particle in particle_row] for particle_row in particles])
-
+    plt.imshow(particles_to_image(particles))
+    plt.show()
