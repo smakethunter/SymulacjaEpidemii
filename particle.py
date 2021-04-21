@@ -1,8 +1,10 @@
 import numpy as np
 from typing import List
 from neighborhood import get_neigbors
+from copy import deepcopy
 main_states = {k: i for i, k in enumerate(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'])}
 conj_states = {k: i for i, k in enumerate(['protecting_others', 'self_protecting', 'no_security_measures', 'infecting', 'organizing_protection'])}
+
 class Particle:
     def __init__(self, state):
         self.state = state
@@ -67,18 +69,18 @@ def infecting_probability(neighbors: List[Particle]):
     proba_from_state = np.full((8,5),0.1)
     proba = 0
     for neighbor in neighbors:
-        print(neighbor.state_conj)
         proba += proba_from_state[main_states[neighbor.state], conj_states[neighbor.state_conj]]
     return proba
 
 
 def update_particles(particles, u):
+    previous_state = deepcopy(particles)
+
     for i, particles_row in enumerate(particles):
         for j, particle in enumerate(particles_row):
             if particle.state == 'healthy':
                 number = np.random.rand()
-                neighbors = get_neigbors(particles, i, j)
-                print([particle.state  for particle in neighbors])
+                neighbors = get_neigbors(previous_state, i, j)
                 probability = infecting_probability(neighbors)
                 if number <= probability :
                     particle.get_infected()
@@ -91,7 +93,6 @@ def update_particles(particles, u):
             else:
                 particle.update_mortality(u['mortality'])
                 particle.wait()
-
 if __name__ == "__main__":
     particles = [[Particle('healthy') for i in range(10)] for j in range(10)]
     particles[3][4].get_infected()
