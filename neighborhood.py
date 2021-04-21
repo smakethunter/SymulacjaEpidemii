@@ -1,4 +1,4 @@
-import numpy as np
+
 def get_neigbors(particles, x, y):
     neighbors = []
     w, k = len(particles), len(particles[0])
@@ -9,26 +9,26 @@ def get_neigbors(particles, x, y):
 
         neighbors.append(particles[x] [y - 1])
 
-    if x < w: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo na dole
+    if x < w-1: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo na dole
 
         neighbors.append(particles[x + 1][y])
 
-    if y < k: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo po prawej
+    if y < k-1: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo po prawej
         neighbors.append(particles[x][y + 1])
 
     if x > 0 and y > 0: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo u gory po lewej
 
         neighbors.append(particles[x - 1][y - 1])
 
-    if x > 0 and y < k: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo u gory po prawej
+    if x > 0 and y < k-1: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo u gory po prawej
 
         neighbors.append(particles[x - 1][y + 1])
 
-    if x < w and y > 0: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo na dole po lewej
+    if x < w-1 and y > 0: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo na dole po lewej
 
         neighbors.append(particles[x + 1] [y - 1])
 
-    if x < w and y < k: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo na dole po prawej
+    if x < w-1 and y < k-1: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo na dole po prawej
 
         neighbors.append(particles[x + 1][y + 1])
     return neighbors
