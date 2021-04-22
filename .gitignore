@@ -1,1 +1,3 @@
-# Project exclude paths
+/data/
+
+data.zip
