@@ -1,13 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import List
-from neighborhood import get_neigbors
+from neighborhood import get_neighbors
 from copy import deepcopy
 main_states = {k: i for i, k in enumerate(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'])}
 conj_states = {k: i for i, k in enumerate(['protecting_others', 'self_protecting', 'no_security_measures', 'infecting', 'organizing_protection'])}
 colours = dict(zip(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'],
                [0,0,1,1,1,0,2,3]))
 colours2rgb = dict(zip([0,1,2,3],[np.array([90, 252, 3])/255.,np.array([252, 28, 3])/255.,np.array([3, 173, 252])/255.,np.array([2, 1, 8])/255.]))
+state_proba = np.array([[0.000001, 0.000015, 0.00003, 0, 0.00003],
+                                 [0.00025, 0, 0, 0, 0],
+                                 [0, 0, 0.04, 0.07, 0],
+                                 [0, 0, 0.05, 0, 0],
+                                 [0, 0, 0.07, 0.095, 0],
+                                 [0, 0, 0, 0, 0.00004],
+                                 [0.0001, 0, 0, 0, 0.0002],
+                                 [0, 0, 0, 0, 0]])
 class Particle:
     def __init__(self, state):
         self.state = state
@@ -67,7 +75,7 @@ class Particle:
         """
         number = np.random.rand()
         probability = self.mortality
-        return number <= probability
+        return number < probability
     def wait(self):
         """
         Zmienia stan jednostki zakażonej lub na kwarantannie w zależności od czasu symulacji
@@ -93,14 +101,14 @@ class Particle:
                     self.state = 'healthy'
 
 
-def probability_of_getting_infected(neighbors: List[Particle]):
+def probability_of_getting_infected(neighbors: List[Particle], proba_from_state=state_proba):
     """
     Zwraca prawdopodobieństwo zakażenia na podstawie stanu sąsiadów
+    :param proba_from_state:
     :param neighbors: lista sąsiadów
     :return: prawdopodobieństwo
     """
     # TODO: edytować tabelę prawopodobieństw
-    proba_from_state = np.full((8,5),0.01)
     proba = 0
     for neighbor in neighbors:
         proba += proba_from_state[main_states[neighbor.state], conj_states[neighbor.state_conj]]
@@ -121,14 +129,14 @@ def update_particles(particles, u):
             if particle.state == 'healthy':
                 # próba zakażenia
                 number = np.random.rand()
-                neighbors = get_neigbors(previous_state, i, j)
-                probability = probability_of_getting_infected(neighbors)
+                neighbors = get_neighbors(previous_state, i, j)
+                probability = u['security_measures']*probability_of_getting_infected(neighbors)
                 if number <= probability :
                     particle.get_infected()
                 else:
                     # skierowanie na kwarantannę
                     number = np.random.rand()
-                    probability = u['security_measures']
+                    probability = u['security_measures']/100
                     if number <= probability:
                         particle.quarantine()
 

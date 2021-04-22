@@ -1,5 +1,12 @@
 
-def get_neigbors(particles, x, y):
+def get_neighbors(particles, x, y):
+    """
+    Zwraca sąsiadów wg sąsiedztwa Moora
+    :param particles: zestaw osobników
+    :param x: indeks x
+    :param y: index y
+    :return: lista sąsiedztwa
+    """
     neighbors = []
     w, k = len(particles), len(particles[0])
     if x > 0: # w przeciwnym razie nie ma co zliczac, bo nie ma nikogo u gory
@@ -35,4 +42,4 @@ def get_neigbors(particles, x, y):
 if __name__ == "__main__":
     x = [[f'{i},{j}' for i in range(10)] for j in range(10)]
     print(x)
-    print(get_neigbors(x,0,1))
+    print(get_neighbors(x,0,1))
