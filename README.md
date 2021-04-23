@@ -29,5 +29,5 @@ kwarantanna i ochrona_starszych
 kwarantanna po pojawieniu sie wirusa, wysokie zaufanie społeczne
 ![Alt Text](data_light/gif/kwarantanna_od_razu.gif)
 
-późna reakcja rządu, ochrona starszych
+późna reakcja rządu, ochrona starszych na niskim poziomie
 ![Alt Text](data_light/gif/pozna_reakcja.gif)
