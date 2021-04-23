@@ -30,4 +30,4 @@ kwarantanna po pojawieniu sie wirusa, wysokie zaufanie społeczne
 ![Alt Text](data_light/gif/kwarantanna_od_razu.gif)
 
 późna reakcja rządu, ochrona starszych
-![Alt Text](data_light/gif/późna reakcja.gif)
+![Alt Text](data_light/gif/pozna_reakcja.gif)
