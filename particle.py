@@ -136,7 +136,7 @@ def update_particles(particles, u):
                 else:
                     # skierowanie na kwarantannę
                     number = np.random.rand()
-                    probability = u['security_measures']/100
+                    probability = u['hygene']
                     if number <= probability:
                         particle.quarantine()
 

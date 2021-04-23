@@ -18,7 +18,7 @@ def animate_pandemic(n_iter=100,
                      save=True):
     # Animate
     if u is None:
-        u = [{'security_measures': 1, 'mortality': 0.15}]
+        u = [{'security_measures': 1, 'mortality': 0.15, 'hygene': 0.02}]
     else:
         n_iter = len(u)-1
     population = [[Particle('healthy') for i in range(n_particles[0])] for j in range(n_particles[0])]
@@ -67,8 +67,13 @@ def animate_pandemic(n_iter=100,
 if __name__ == "__main__":
 
     data = pd.read_csv('data/UKdata.csv')
-    security_measures = data['GovernmentResponseIndex'].fillna(0).apply(lambda x: 1-x/data['GovernmentResponseIndex'].max()).head(200).to_numpy()
-    control = [{'security_measures': sm, 'mortality': m} for sm, m in zip(list(security_measures),
-                                                                          list(np.full(security_measures.shape,0.15)))]
+    security_measures = data['GovernmentResponseIndex'].fillna(0).apply(lambda x: 0.1+1-x/data['GovernmentResponseIndex'].max()).to_numpy()[0:150]
 
-    animate_pandemic(100,(500,500), u = control)
+    hygene = data['ContainmentHealthIndex'].fillna(0).apply(lambda x: x/data['GovernmentResponseIndex'].max()-0.2).to_numpy()[0:150]
+
+    mortality = data['ContainmentHealthIndex'].fillna(0).apply(lambda x: 0.45-0.1*data['H8_Protection of elderly people'].max()).to_numpy()[0:150]
+
+    control = [{'security_measures': sm, 'mortality': m, 'hygene':hygene} for sm, m, hygene in zip(list(security_measures),
+                                                                          list(mortality), list(hygene))]
+
+    animate_pandemic(100, (500, 500), u=control)
