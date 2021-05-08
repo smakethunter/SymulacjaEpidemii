@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import List
+
 from neighborhood import get_neighbors
 from copy import deepcopy
 main_states = {k: i for i, k in enumerate(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'])}
 conj_states = {k: i for i, k in enumerate(['protecting_others', 'self_protecting', 'no_security_measures', 'infecting', 'organizing_protection'])}
 colours = dict(zip(['healthy','quarantine', 'infected', 'sick', 'infected_and_sick', 'in_hospital','recovered', 'dead'],
-               [0,0,1,1,1,0,2,3]))
+               [0, 0, 1, 1, 1, 0, 2, 3]))
 colours2rgb = dict(zip([0,1,2,3],[np.array([90, 252, 3])/255.,np.array([252, 28, 3])/255.,np.array([3, 173, 252])/255.,np.array([2, 1, 8])/255.]))
 state_proba = np.array([[0.000001, 0.000015, 0.00003, 0, 0.00003],
                                  [0.00025, 0, 0, 0, 0],
-                                 [0, 0, 0.04, 0.07, 0],
-                                 [0, 0, 0.05, 0, 0],
-                                 [0, 0, 0.07, 0.095, 0],
+                                 [0, 0, 0.06, 0.07, 0],
+                                 [0, 0, 0.01, 0, 0],
+                                 [0, 0, 0.07, 0.09, 0],
                                  [0, 0, 0, 0, 0.00004],
                                  [0.0001, 0, 0, 0, 0.0002],
                                  [0, 0, 0, 0, 0]])
@@ -23,9 +23,9 @@ class Particle:
         self.time_waiting = 0
         self.mortality = 0.15
 
-    def update_mortality(self,mortality):
+    def update_mortality(self, mortality):
         """
-        Update śmiertelności
+        Update smiertelnosci
         :param mortality:
         :return:
         """
@@ -61,7 +61,7 @@ class Particle:
 
     def quarantine(self):
         """
-        wyślij na kwarantannę
+        wyslij na kwarantanne
 
         """
         self.state = 'quarantine'
@@ -78,7 +78,7 @@ class Particle:
         return number < probability
     def wait(self):
         """
-        Zmienia stan jednostki zakażonej lub na kwarantannie w zależności od czasu symulacji
+        Zmienia stan jednostki zakazonej lub na kwarantannie w zaleznosci od czasu symulacji
 
         """
         if self.state != 'healthy' and self.state != 'dead':
@@ -99,27 +99,31 @@ class Particle:
                 if self.time_waiting == 14:
                     self.time_waiting = 0
                     self.state = 'healthy'
+            elif self.state == 'recovered':
+                if self.time_waiting == 60:
+                    self.state = 'healthy'
+                    self.state_conj = np.random.choice(['protecting_others', 'self_protecting', 'no_security_measures'])
+                    self.time_waiting=0
 
-
-def probability_of_getting_infected(neighbors: List[Particle], proba_from_state=state_proba):
+def probability_of_getting_infected(neighbors, proba_from_state=state_proba):
     """
-    Zwraca prawdopodobieństwo zakażenia na podstawie stanu sąsiadów
+    Zwraca prawdopodobienstwo zakazenia na podstawie stanu sasiadow
     :param proba_from_state:
-    :param neighbors: lista sąsiadów
-    :return: prawdopodobieństwo
+    :param neighbors: lista sasiadow
+    :return: prawdopodobienstwo
     """
-    # TODO: edytować tabelę prawopodobieństw
+
     proba = 0
     for neighbor in neighbors:
         proba += proba_from_state[main_states[neighbor.state], conj_states[neighbor.state_conj]]
     return proba
 
 
-def update_particles(particles, u):
+def update_particles(particles, u, iter=1):
     """
-    Dla każdego osobnika z planszy wykonujemy update stanu
+    Dla kazdego osobnika z planszy wykonujemy update stanu
     :param particles: osobniki z planszy
-    :param u: sterowanie w postaci słownika
+    :param u: sterowanie w postaci slownika
     :return: None
     """
     previous_state = deepcopy(particles)
@@ -127,26 +131,26 @@ def update_particles(particles, u):
     for i, particles_row in enumerate(particles):
         for j, particle in enumerate(particles_row):
             if particle.state == 'healthy':
-                # próba zakażenia
+
                 number = np.random.rand()
                 neighbors = get_neighbors(previous_state, i, j)
-                probability = u['security_measures']*probability_of_getting_infected(neighbors)
+                probability = u['security_measures']*probability_of_getting_infected(neighbors)*iter
                 if number <= probability :
                     particle.get_infected()
                 else:
-                    # skierowanie na kwarantannę
+
                     number = np.random.rand()
                     probability = u['hygene']
                     if number <= probability:
                         particle.quarantine()
 
             else:
-                # zmiana stanu dla zakażonego
+
                 particle.update_mortality(u['mortality'])
                 particle.wait()
 
 
-def particles_to_image(particles)-> np.ndarray:
+def particles_to_image(particles):
     """
     Rysowanie planszy
     :param particles: List(List(Particle)) - osobniki
@@ -158,11 +162,11 @@ def particles_to_image(particles)-> np.ndarray:
             image[i, j, :] = colours2rgb[colours[particle.state]]
     return image
 
-def get_state_number(particles, states: List[str]):
+def get_state_number(particles, states):
     """
-    Podaje liczebność danych klas
+    Podaje liczebnosc danych klas
     :param particles: osobniki
-    :param states: stany które chcemy podliczyć
+    :param states: stany ktore chcemy podliczyc
     :return: podliczone stany
     """
     sum = 0
